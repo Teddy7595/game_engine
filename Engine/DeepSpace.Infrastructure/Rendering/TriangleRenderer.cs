@@ -12,6 +12,8 @@ namespace DeepSpace.Infrastructure.Rendering
         private uint _vertexArrayObject;
         private uint _shaderProgram;
         private int _modelMatrixLocation;
+        private int _viewMatrixLocation;
+        private int _projectionMatrixLocation;
 
         // Vértices de nuestro triángulo (en coordenadas normalizadas de -1 a 1)
         private readonly float[] _vertices =
@@ -74,7 +76,9 @@ namespace DeepSpace.Infrastructure.Rendering
 
             // Obtener la ubicación de la variable uniforme "model" en el shader
             _modelMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "model");
-
+            _viewMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "view");
+            _projectionMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "projection");
+            
             // Limpiar shaders ya que están enlazados al programa
             _gl.DeleteShader(vertexShader);
             _gl.DeleteShader(fragmentShader);
@@ -85,7 +89,7 @@ namespace DeepSpace.Infrastructure.Rendering
             _gl.EnableVertexAttribArray(0);
         }
 
-        public void DrawTriangles(TransformComponent transform)
+        public void DrawMesh(TransformComponent transform, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
         {
             _gl.UseProgram(_shaderProgram);
             // Crear la matriz de modelo basada en la posición, rotación y escala del TransformComponent
@@ -93,7 +97,9 @@ namespace DeepSpace.Infrastructure.Rendering
             // Enviar la matriz de modelo al shader
             unsafe
             {
-                _gl.UniformMatrix4(_modelMatrixLocation, 1, true, (float*)&modelMatrix);
+                _gl.UniformMatrix4(_modelMatrixLocation, 1, false, (float*)&modelMatrix);
+                _gl.UniformMatrix4(_viewMatrixLocation, 1, false, (float*)&viewMatrix);
+                _gl.UniformMatrix4(_projectionMatrixLocation, 1, false, (float*)&projectionMatrix);
             }
             _gl.BindVertexArray(_vertexArrayObject);
             _gl.DrawArrays(PrimitiveType.Triangles, 0, 3);

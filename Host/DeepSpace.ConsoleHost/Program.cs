@@ -2,25 +2,30 @@
 using DeepSpace.Domain.Core;
 using DeepSpace.Domain.Components;
 using DeepSpace.Infrastructure.Windowing;
+using System.Numerics;
 
-//-- CONFIGURATION
-var World = new World(); //-- Initialize World
-var SystemManager = new SystemManager(); //-- Initialize System Manager
+// --- CONFIGURACIÓN ---
+var world = new World();
+var systemManager = new SystemManager();
+systemManager.AddSystem(new DebugLogSystem());
 
-SystemManager.AddSystem(new DebugLogSystem()); //--- Register Systems Here
+// Creamos la entidad del triángulo en el centro del mundo
+var triangleEntity = world.CreateEntity();
+world.AddComponent(triangleEntity, new TagComponent("Mi Triángulo"));
+world.AddComponent(triangleEntity, new TransformComponent { Position = Vector3.Zero }); // En (0,0,0)
+world.AddComponent(triangleEntity, new RenderableComponent());
 
+// Creamos la entidad de la CÁMARA
+var cameraEntity = world.CreateEntity();
+world.AddComponent(cameraEntity, new TagComponent("Cámara Principal"));
+// La posicionamos un poco hacia atrás en el eje Z para que pueda "ver" el origen
+world.AddComponent(cameraEntity, new TransformComponent { Position = new Vector3(0, 0, 3) });
+world.AddComponent(cameraEntity, new CameraComponent());
+world.AddComponent(cameraEntity, new MainCameraComponent()); // La marcamos como principal
 
-var playerEntity = World.CreateEntity(); //-- Create an Entity
-World.AddComponent(playerEntity, new TagComponent("Mi Triangulo")); //-- Add Tag Component
-World.AddComponent(playerEntity, new TransformComponent
-{
-    Position = new System.Numerics.Vector3(0.5f, 0.25f, 0.0f)
-}); //-- Add Transform Component
-World.AddComponent(playerEntity, new RenderableComponent()); //-- Add Renderable Component
-
-var GameWindow = new GameWindow(SystemManager, World); //-- Initialize Game Window
-
-GameWindow.Run(); //-- Start Game Loop
+// --- EJECUCIÓN ---
+var gameWindow = new GameWindow(systemManager, world);
+gameWindow.Run();
 
 
 

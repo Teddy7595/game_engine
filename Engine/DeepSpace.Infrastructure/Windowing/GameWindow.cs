@@ -39,9 +39,10 @@ namespace DeepSpace.Infrastructure.Windowing
             var _renderer = new TriangleRenderer(_gl);
             _renderer.Load();
 
-            // Crear el sistema de renderizado y agregarlo al SystemManager
-            var renderSystem = new RenderSystem(_renderer);
-            _systemManager.AddSystem(renderSystem);
+            // Calcular la relación de aspecto
+            var aspectRatio = (float)_window.Size.X / _window.Size.Y;
+            // Añadir el sistema de renderizado al SystemManager
+            _systemManager.AddSystem(new RenderSystem(_renderer, aspectRatio));
         }
 
         private void OnUpdate(double deltaTime)

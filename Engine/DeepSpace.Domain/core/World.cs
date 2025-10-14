@@ -1,5 +1,6 @@
 using DeepSpace.Domain.Entities;
 using DeepSpace.Domain.Components;
+using DeepSpace.Domain.Exceptions;
 
 namespace DeepSpace.Domain.Core
 {
@@ -28,6 +29,17 @@ namespace DeepSpace.Domain.Core
             // Añadimos o actualizamos el componente para la entidad
             _componentStores[type][entity.Id] = component;
         }
+
+        //Obtener por autoridad un componente de una entidad
+        public T GetRequiredComponent<T>(Entity entity) where T : class, IComponent
+        {
+            var component = GetComponent<T>(entity);
+            if (component == null)
+                throw new ComponentNotFoundException(typeof(T), entity.Id);
+                
+            return component;
+        }
+
         // Obtener un componente de una entidad
         public T? GetComponent<T>(Entity entity) where T : class, IComponent
         {

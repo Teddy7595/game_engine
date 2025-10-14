@@ -1,4 +1,5 @@
 using DeepSpace.Application.Interfaces;
+using DeepSpace.Application.Logic;
 using DeepSpace.Domain.Components;
 using DeepSpace.Domain.Core;
 
@@ -7,14 +8,16 @@ namespace DeepSpace.Application.Systems
     public class RenderSystem : ISystem
     {
         private readonly IRenderer _renderer;
+        private readonly float _aspectRatio;
 
         // El sistema RECIBE la implementación del renderizador. No sabe cuál es.
-        public RenderSystem(IRenderer renderer)
+        public RenderSystem(IRenderer renderer, float aspectRatio)
         {
             _renderer = renderer;
+            _aspectRatio = aspectRatio;
         }
 
-        public void Update(World world, float deltaTime)
+        /* public void Update(World world, float deltaTime)
         {
             // Obtener todas las entidades con el componente Renderable
             var renderableEntities = world.View<RenderableComponent>();
@@ -26,6 +29,32 @@ namespace DeepSpace.Application.Systems
                 {
                     //El sistema solo habla con la interfaz del renderizador mas no con la clase en concreto
                     _renderer.DrawTriangles(transform);
+                }
+            }
+        } */
+
+        public void Update(World world, float deltaTime)
+        {
+            //Obtenemos la camara activa
+            var cameraEntity = world.View<CameraComponent>().FirstOrDefault();
+            if (cameraEntity.Id == Guid.Empty) return; // No hay cámara activa
+
+            var cameraTransform = world.GetRequiredComponent<TransformComponent>(cameraEntity);
+            var cameraComponent = world.GetRequiredComponent<CameraComponent>(cameraEntity);
+
+            // Configurar la vista de la cámara
+            var viewMatrix = Camera.GetViewMatrix(cameraTransform);
+            var projectionMatrix = Camera.GetProjectionMatrix(cameraComponent, _aspectRatio);
+
+            // Obtener todas las entidades con el componente Renderable
+            var renderableEntities = world.View<RenderableComponent>();
+            foreach (var entity in renderableEntities)
+            {
+                var transform = world.GetRequiredComponent<TransformComponent>(entity);
+                if (transform != null)
+                {
+                    //El sistema solo habla con la interfaz del renderizador mas no con la clase en concreto
+                    _renderer.DrawMesh(transform, viewMatrix, projectionMatrix);
                 }
             }
         }
