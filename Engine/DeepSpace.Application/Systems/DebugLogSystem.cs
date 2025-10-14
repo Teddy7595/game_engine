@@ -1,7 +1,7 @@
-using DeepSpaceEngine.Domain.Core;
-using DeepSpaceEngine.Domain.Components;
+using DeepSpace.Domain.Core;
+using DeepSpace.Domain.Components;
 
-namespace DeepSpaceEngine.Application.Systems
+namespace DeepSpace.Application.Systems
 {
     public class DebugLogSystem : ISystem
     {
@@ -17,11 +17,11 @@ namespace DeepSpaceEngine.Application.Systems
                 var transform = world.GetComponent<TransformComponent>(entity);
                 //como sabemos que el entity tiene un TagComponent, podemos obtenerlo directamente
                 var tag = world.GetComponent<TagComponent>(entity);
-
+    
                  // 4. Si tiene ambos componentes, imprimimos su información.
                 if (transform != null && tag != null)
-                    System.Diagnostics.Debug.WriteLine($"Entity '{tag.Tag}' is at Position(X:{transform.Position.X}, Y:{transform.Position.Y}, Z:{transform.Position.Z})");
-
+                    Console.WriteLine($"Entity '{tag.Tag}' is at Position(X:{transform.Position.X}, Y:{transform.Position.Y}, Z:{transform.Position.Z})");
+                
             }
         }
     }

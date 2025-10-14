@@ -1,4 +1,4 @@
-namespace DeepSpaceEngine.Domain.Entities
+namespace DeepSpace.Domain.Entities
 {
     public readonly struct Entity
     {

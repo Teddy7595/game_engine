@@ -1,4 +1,4 @@
-namespace DeepSpaceEngine.Domain.Components
+namespace DeepSpace.Domain.Components
 {
     public class TagComponent: IComponent
     {

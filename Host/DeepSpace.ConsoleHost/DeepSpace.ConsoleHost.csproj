@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\DeepSpace.Application\DeepSpace.Application.csproj" />
+    <ProjectReference Include="..\..\Engine\DeepSpace.Infrastructure\DeepSpace.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -10,5 +11,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="Shaders\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

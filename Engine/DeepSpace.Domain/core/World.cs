@@ -1,7 +1,7 @@
-using DeepSpaceEngine.Domain.Entities;
-using DeepSpaceEngine.Domain.Components;
+using DeepSpace.Domain.Entities;
+using DeepSpace.Domain.Components;
 
-namespace DeepSpaceEngine.Domain.Core
+namespace DeepSpace.Domain.Core
 {
     public class World
     {
@@ -11,7 +11,7 @@ namespace DeepSpaceEngine.Domain.Core
         private readonly Dictionary<Type, Dictionary<Guid, IComponent>> _componentStores = new();
 
         // construimos la entidad con un ID unico global
-        public Entity CreateEntity(string name = null)
+        public Entity CreateEntity(string? name = null)
         {
             var entity = new Entity(Guid.Parse(name ?? Guid.NewGuid().ToString()));
             return entity;

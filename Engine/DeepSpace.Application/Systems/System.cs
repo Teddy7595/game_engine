@@ -1,6 +1,6 @@
-using DeepSpaceEngine.Domain.Core;
+using DeepSpace.Domain.Core;
 
-namespace DeepSpaceEngine.Application.Systems
+namespace DeepSpace.Application.Systems
 {
     public interface ISystem
     {
