@@ -1,3 +1,4 @@
+using System.Drawing;
 using DeepSpace.Application.Interfaces;
 using DeepSpace.Application.Logic;
 using DeepSpace.Domain.Components;
@@ -48,6 +49,13 @@ namespace DeepSpace.Application.Systems
             // Configurar la proyección de la cámara
             var projectionMatrix = _cameraLogic.GetProjectionMatrix(cameraComponent, _aspectRatio);
 
+            var lightEntity = world.View<LightComponent>().FirstOrDefault();
+            if (lightEntity.Id == Guid.Empty) return; // No hay luz activa
+
+            var lightTransform = world.GetRequiredComponent<TransformComponent>(lightEntity);
+            var lightComponent = world.GetRequiredComponent<LightComponent>(lightEntity);
+            //Limpiar la pantalla antes de dibujar
+            _renderer.Clear(Color.CornflowerBlue);
             // Obtener todas las entidades con el componente Renderable
             var renderableEntities = world.View<RenderableComponent>();
             foreach (var entity in renderableEntities)
@@ -56,7 +64,15 @@ namespace DeepSpace.Application.Systems
                 if (transform != null)
                 {
                     //El sistema solo habla con la interfaz del renderizador mas no con la clase en concreto
-                    _renderer.DrawMesh(transform, viewMatrix, projectionMatrix);
+                    _renderer.DrawMesh(
+                        transform,
+                        viewMatrix,
+                        projectionMatrix,
+                        lightTransform.Position,
+                        cameraTransform.Position,
+                        lightComponent.Color,
+                        lightComponent.Intensity
+                    );
                 }
             }
         }

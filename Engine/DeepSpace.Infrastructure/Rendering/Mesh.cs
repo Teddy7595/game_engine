@@ -2,6 +2,7 @@ using DeepSpace.Domain.Components;
 using DeepSpace.Application.Interfaces;
 using Silk.NET.OpenGL;
 using System.Numerics;
+using System.Drawing;
 
 namespace DeepSpace.Infrastructure.Rendering
 {
@@ -15,30 +16,60 @@ namespace DeepSpace.Infrastructure.Rendering
         private int _viewMatrixLocation;
         private int _projectionMatrixLocation;
         private uint _elementBufferObject;
+        private int _lightPosLocation;   
+        private int _lightColorLocation; 
+        private int _viewPosLocation;    
+        private int _objectColorLocation;
 
         // Los 8 vértices únicos de un cubo
         private readonly float[] _vertices =
         {
-            // Posición
-            0.5f,  0.5f,  0.5f, // Arriba-derecha-frontal
-            0.5f, -0.5f,  0.5f, // Abajo-derecha-frontal
-            -0.5f, -0.5f,  0.5f, // Abajo-izquierda-frontal
-            -0.5f,  0.5f,  0.5f, // Arriba-izquierda-frontal
-            0.5f,  0.5f, -0.5f, // Arriba-derecha-trasera
-            0.5f, -0.5f, -0.5f, // Abajo-derecha-trasera
-            -0.5f, -0.5f, -0.5f, // Abajo-izquierda-trasera
-            -0.5f,  0.5f, -0.5f  // Arriba-izquierda-trasera
+            // Cara de atrás (-Z)
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+            // Cara de adelante (+Z)
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+            // Cara de la izquierda (-X)
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+            // Cara de la derecha (+X)
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+            // Cara de abajo (-Y)
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+
+            // Cara de arriba (+Y)
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f
         };
 
         // Los índices que forman los 12 triángulos
         private readonly uint[] _indices =
         {
-            0, 1, 3, 1, 2, 3, // Cara frontal
-            4, 5, 0, 5, 1, 0, // Cara derecha
-            7, 6, 4, 6, 5, 4, // Cara trasera
-            3, 2, 7, 2, 6, 7, // Cara izquierda
-            4, 0, 7, 0, 3, 7, // Cara superior
-            5, 6, 1, 6, 2, 1  // Cara inferior
+            0, 1, 2,  0, 2, 3,    // Cara de atrás
+            4, 5, 6,  4, 6, 7,    // Cara de adelante
+            8, 9, 10, 8, 10, 11,  // Cara de la izquierda
+            12, 13, 14, 12, 14, 15, // Cara de la derecha
+            16, 17, 18, 16, 18, 19, // Cara de abajo
+            20, 21, 22, 20, 22, 23  // Cara de arriba
         };
 
         public MeshRenderer(GL gl)
@@ -105,21 +136,43 @@ namespace DeepSpace.Infrastructure.Rendering
             CheckLinkErrors(_shaderProgram);
 
             // Obtener la ubicación de la variable uniforme "model" en el shader
+            // --- OBTENER LAS NUEVAS UBICACIONES DE UNIFORMS ---
             _modelMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "model");
             _viewMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "view");
             _projectionMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "projection");
+            
+            // UBICACIONES NUEVAS
+            _lightPosLocation = _gl.GetUniformLocation(_shaderProgram, "lightPos");
+            _lightColorLocation = _gl.GetUniformLocation(_shaderProgram, "lightColor");
+            _viewPosLocation = _gl.GetUniformLocation(_shaderProgram, "viewPos");
+            _objectColorLocation = _gl.GetUniformLocation(_shaderProgram, "objectColor");
+            // --- FIN DE OBTENER UBICACIONES ---
             
             // Limpiar shaders ya que están enlazados al programa
             _gl.DeleteShader(vertexShader);
             _gl.DeleteShader(fragmentShader);
 
             //-- configurar los punteros de atributos de vértices
-            //le decimos a OpenGL como interpretar los datos del buffer
-            _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), IntPtr.Zero);
+            // El stride (paso) ahora es de 6 floats (3 de posición + 3 de normal)
+            int stride = 6 * sizeof(float);
+
+            // Atributo de Posición (location = 0)
+            unsafe
+            {
+                _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint)stride, null);
+            }
             _gl.EnableVertexAttribArray(0);
+
+            // Atributo de Normal (location = 1)
+            // El offset es de 3 floats, que es donde empiezan los datos de la normal
+            unsafe
+            {
+                _gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (uint)stride, (void*)(3 * sizeof(float)));
+            }
+            _gl.EnableVertexAttribArray(1);
         }
 
-        public void DrawMesh(TransformComponent transform, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix)
+        public void DrawMesh(TransformComponent transform, Matrix4x4 viewMatrix, Matrix4x4 projectionMatrix, Vector3 lightPosition, Vector3 viewPosition, Color lightColor, float lightIntensity)
         {
             _gl.UseProgram(_shaderProgram);
             // Crear la matriz de modelo basada en la posición, rotación y escala del TransformComponent
@@ -135,6 +188,16 @@ namespace DeepSpace.Infrastructure.Rendering
                 _gl.UniformMatrix4(_modelMatrixLocation, 1, false, (float*)&modelMatrix);
                 _gl.UniformMatrix4(_viewMatrixLocation, 1, false, (float*)&viewMatrix);
                 _gl.UniformMatrix4(_projectionMatrixLocation, 1, false, (float*)&projectionMatrix);
+
+                 // --- ENVIAR LOS NUEVOS UNIFORMS ---
+                _gl.Uniform3(_lightPosLocation, lightPosition.X, lightPosition.Y, lightPosition.Z);
+                _gl.Uniform3(_lightColorLocation, lightColor.R / 255.0f, lightColor.G / 255.0f, lightColor.B / 255.0f);
+                _gl.Uniform3(_viewPosLocation, viewPosition.X, viewPosition.Y, viewPosition.Z);
+                // Para el color del objeto (cubo), lo dejamos en un naranja fijo por ahora
+                _gl.Uniform3(_objectColorLocation, 1.0f, 0.5f, 0.2f);
+                //Si queremos usar la intensidad de la luz en el shader, podemos enviarla también
+                //_gl.Uniform1(_lightIntensityLocation, lightIntensity);
+                // --- FIN DE ENVIAR UNIFORMS ---
             }
             _gl.BindVertexArray(_vertexArrayObject);
             unsafe
@@ -161,6 +224,21 @@ namespace DeepSpace.Infrastructure.Rendering
                 string infoLog = _gl.GetProgramInfoLog(program);
                 Console.WriteLine($"ERROR::PROGRAM_LINKING_ERROR of type: PROGRAM\n{infoLog}");
             }
+        }
+
+        public void Unload()
+        {
+            _gl.DeleteProgram(_shaderProgram);
+            _gl.DeleteBuffer(_vertexBufferObject);
+            _gl.DeleteVertexArray(_vertexArrayObject);
+            _gl.DeleteBuffer(_elementBufferObject);
+        }
+
+        public void Clear(Color color)
+        {
+            _gl.ClearColor(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
+            _gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            _gl.Enable(EnableCap.DepthTest);
         }
     }
 }
