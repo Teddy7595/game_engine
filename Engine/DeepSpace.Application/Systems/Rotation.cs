@@ -7,8 +7,8 @@ namespace DeepSpace.Application.Systems
     {
         public void Update(World world, float deltaTime)
         {
-            //Buscamos todas las entidades con un componente de TransformComponent
-            var entities = world.View<TransformComponent>();
+            //Buscamos todas las entidades con un componente de AutoRotateComponent
+            var entities = world.View<AutoRotateComponent>();
 
             foreach(var entity in entities)
             {

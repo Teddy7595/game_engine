@@ -9,6 +9,7 @@ namespace DeepSpace.Application.Systems
     {
         private readonly IRenderer _renderer;
         private readonly float _aspectRatio;
+        private readonly Camera _cameraLogic = new();
 
         // El sistema RECIBE la implementación del renderizador. No sabe cuál es.
         public RenderSystem(IRenderer renderer, float aspectRatio)
@@ -43,8 +44,9 @@ namespace DeepSpace.Application.Systems
             var cameraComponent = world.GetRequiredComponent<CameraComponent>(cameraEntity);
 
             // Configurar la vista de la cámara
-            var viewMatrix = Camera.GetViewMatrix(cameraTransform);
-            var projectionMatrix = Camera.GetProjectionMatrix(cameraComponent, _aspectRatio);
+            var viewMatrix = _cameraLogic.GetViewMatrix(cameraTransform);
+            // Configurar la proyección de la cámara
+            var projectionMatrix = _cameraLogic.GetProjectionMatrix(cameraComponent, _aspectRatio);
 
             // Obtener todas las entidades con el componente Renderable
             var renderableEntities = world.View<RenderableComponent>();

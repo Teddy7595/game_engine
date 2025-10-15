@@ -39,11 +39,20 @@ namespace DeepSpace.Infrastructure.Windowing
             if (_gl == null) throw new InvalidOperationException("Failed to create OpenGL context.");
 
             // Inicializar el gestor de entrada
-            var inputContext = _window.CreateInput().Keyboards.FirstOrDefault() ?? throw new InvalidOperationException("No keyboard found.");
+            var inputContext = _window.CreateInput();
+            var keyboard = inputContext.Keyboards.FirstOrDefault() ?? throw new InvalidOperationException("No keyboard found.");
+            var mouse = inputContext.Mice.FirstOrDefault() ?? throw new InvalidOperationException("No mouse found.");
 
             // Crear e inicializar el InputManager
             var inputManager = new InputManager();
-            inputManager.Initialize(inputContext);
+            inputManager.Initialize(keyboard, mouse);
+
+            // Ocultar y capturar el cursor del ratón para un control FPS
+            if (mouse != null)
+            {
+                mouse.Cursor.CursorMode = CursorMode.Raw;
+                inputManager.CaptureLastMousePosition();
+            }
             
             // Inicializar el renderizador de triángulos
             var _renderer = new MeshRenderer(_gl);

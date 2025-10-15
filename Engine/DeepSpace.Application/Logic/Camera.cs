@@ -5,18 +5,28 @@ namespace DeepSpace.Application.Logic
 {
     public class Camera
     {
-        public static Matrix4x4 GetViewMatrix(TransformComponent transform)
+        public Vector3 Front { get; private set; } = -Vector3.UnitZ;
+        public Vector3 Right { get; private set; } = Vector3.UnitX;
+        public Vector3 Up { get; private set; } = Vector3.UnitY;
+        public Matrix4x4 GetViewMatrix(TransformComponent transform)
         {
-            // Crear la matriz de vista basada en la posición y rotación del TransformComponent
-            // El vector "up" le dice a la camara cual es la direccion de arriba
-            var cameraPosition = transform.Position;
-            var cameraTarget = Vector3.Zero; // Mirando hacia el origen
-            var cameraUp = Vector3.UnitY; // Arriba en la dirección Y positiva
+            var position = transform.Position;
+        
+            // Calculamos el vector "frontal" de la cámara a partir de los ángulos de Euler
+            Vector3 front;
+            front.X = MathF.Cos(transform.Rotation.X) * MathF.Cos(transform.Rotation.Y);
+            front.Y = MathF.Sin(transform.Rotation.X);
+            front.Z = MathF.Cos(transform.Rotation.X) * MathF.Sin(transform.Rotation.Y);
+            Front = Vector3.Normalize(front);
+            
+            // El vector "derecha" y "arriba" se calculan a partir del vector frontal
+            Right = Vector3.Normalize(Vector3.Cross(Front, Vector3.UnitY));
+            Up = Vector3.Normalize(Vector3.Cross(Right, Front));
 
-            return Matrix4x4.CreateLookAt(cameraPosition, cameraTarget, cameraUp);
+            return Matrix4x4.CreateLookAt(position, position + Front, Up);
         }
 
-        public static Matrix4x4 GetProjectionMatrix(CameraComponent camera, float aspectRatio)
+        public Matrix4x4 GetProjectionMatrix(CameraComponent camera, float aspectRatio)
         {
             // Crear la matriz de proyección perspectiva
             return Matrix4x4.CreatePerspectiveFieldOfView(
