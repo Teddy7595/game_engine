@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace DeepSpace.Infrastructure.Rendering
 {
-    public class TriangleRenderer : IRenderer
+    public class MeshRenderer : IRenderer
     {
         private readonly GL _gl;
         private uint _vertexBufferObject;
@@ -14,16 +14,34 @@ namespace DeepSpace.Infrastructure.Rendering
         private int _modelMatrixLocation;
         private int _viewMatrixLocation;
         private int _projectionMatrixLocation;
+        private uint _elementBufferObject;
 
-        // Vértices de nuestro triángulo (en coordenadas normalizadas de -1 a 1)
+        // Los 8 vértices únicos de un cubo
         private readonly float[] _vertices =
         {
-            -0.5f, -0.5f, 0.0f, // Abajo izquierda
-             0.5f, -0.5f, 0.0f, // Abajo derecha
-             0.0f,  0.5f, 0.0f  // Arriba centro
+            // Posición
+            0.5f,  0.5f,  0.5f, // Arriba-derecha-frontal
+            0.5f, -0.5f,  0.5f, // Abajo-derecha-frontal
+            -0.5f, -0.5f,  0.5f, // Abajo-izquierda-frontal
+            -0.5f,  0.5f,  0.5f, // Arriba-izquierda-frontal
+            0.5f,  0.5f, -0.5f, // Arriba-derecha-trasera
+            0.5f, -0.5f, -0.5f, // Abajo-derecha-trasera
+            -0.5f, -0.5f, -0.5f, // Abajo-izquierda-trasera
+            -0.5f,  0.5f, -0.5f  // Arriba-izquierda-trasera
         };
 
-        public TriangleRenderer(GL gl)
+        // Los índices que forman los 12 triángulos
+        private readonly uint[] _indices =
+        {
+            0, 1, 3, 1, 2, 3, // Cara frontal
+            4, 5, 0, 5, 1, 0, // Cara derecha
+            7, 6, 4, 6, 5, 4, // Cara trasera
+            3, 2, 7, 2, 6, 7, // Cara izquierda
+            4, 0, 7, 0, 3, 7, // Cara superior
+            5, 6, 1, 6, 2, 1  // Cara inferior
+        };
+
+        public MeshRenderer(GL gl)
         {
             _gl = gl;
         }
@@ -46,6 +64,18 @@ namespace DeepSpace.Infrastructure.Rendering
                     _gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(sizeof(float) * _vertices.Length), v, BufferUsageARB.StaticDraw);
                 }
             }
+
+            // Crear y bind del Element Buffer Object (EBO)
+            _elementBufferObject = _gl.GenBuffer();
+            _gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, _elementBufferObject);
+            unsafe
+            {
+                fixed (uint* ptr = _indices)
+                {
+                    _gl.BufferData(BufferTargetARB.ElementArrayBuffer, (uint)(_indices.Length * sizeof(uint)), ptr, BufferUsageARB.StaticDraw);
+                }
+            }
+
 
             // --- cargar y compilar shaders ---
             // 1. Obtenemos la ruta del directorio donde se está ejecutando el programa.
@@ -94,6 +124,11 @@ namespace DeepSpace.Infrastructure.Rendering
             _gl.UseProgram(_shaderProgram);
             // Crear la matriz de modelo basada en la posición, rotación y escala del TransformComponent
             Matrix4x4 modelMatrix = Matrix4x4.CreateTranslation(transform.Position);
+            //Creamos las matrices de rotación y escala si es necesario
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(transform.Rotation.Y, transform.Rotation.X, transform.Rotation.Z);
+            Matrix4x4 scaleMatrix = Matrix4x4.CreateScale(transform.Scale);
+            // Combinamos las matrices: primero escala, luego rotación, luego traslación
+            modelMatrix = scaleMatrix * rotationMatrix * modelMatrix;
             // Enviar la matriz de modelo al shader
             unsafe
             {
@@ -102,7 +137,10 @@ namespace DeepSpace.Infrastructure.Rendering
                 _gl.UniformMatrix4(_projectionMatrixLocation, 1, false, (float*)&projectionMatrix);
             }
             _gl.BindVertexArray(_vertexArrayObject);
-            _gl.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            unsafe
+            {
+                _gl.DrawElements(PrimitiveType.Triangles, (uint)_indices.Length, DrawElementsType.UnsignedInt, null);
+            }
         }
 
         private void CheckCompileErrors(uint shader, string type)

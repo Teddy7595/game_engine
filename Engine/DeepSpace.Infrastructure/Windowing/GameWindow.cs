@@ -1,8 +1,10 @@
 using Silk.NET.Windowing;
 using Silk.NET.OpenGL;
+using Silk.NET.Input;
 using DeepSpace.Domain.Core;
 using DeepSpace.Application.Systems;
 using DeepSpace.Infrastructure.Rendering;
+using DeepSpace.Infrastructure.Input;
 
 namespace DeepSpace.Infrastructure.Windowing
 {
@@ -34,15 +36,25 @@ namespace DeepSpace.Infrastructure.Windowing
         private void OnLoad()
         {
             _gl = _window.CreateOpenGL();
+            if (_gl == null) throw new InvalidOperationException("Failed to create OpenGL context.");
 
+            // Inicializar el gestor de entrada
+            var inputContext = _window.CreateInput().Keyboards.FirstOrDefault() ?? throw new InvalidOperationException("No keyboard found.");
+
+            // Crear e inicializar el InputManager
+            var inputManager = new InputManager();
+            inputManager.Initialize(inputContext);
+            
             // Inicializar el renderizador de triángulos
-            var _renderer = new TriangleRenderer(_gl);
+            var _renderer = new MeshRenderer(_gl);
             _renderer.Load();
 
             // Calcular la relación de aspecto
             var aspectRatio = (float)_window.Size.X / _window.Size.Y;
             // Añadir el sistema de renderizado al SystemManager
             _systemManager.AddSystem(new RenderSystem(_renderer, aspectRatio));
+            // Añadir el sistema de input al SystemManager
+            _systemManager.AddSystem(new InputSystem(inputManager));
         }
 
         private void OnUpdate(double deltaTime)

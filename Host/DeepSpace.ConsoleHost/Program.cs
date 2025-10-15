@@ -8,10 +8,11 @@ using System.Numerics;
 var world = new World();
 var systemManager = new SystemManager();
 systemManager.AddSystem(new DebugLogSystem());
+systemManager.AddSystem(new RotationSystem());
 
-// Creamos la entidad del triángulo en el centro del mundo
+// Creamos la entidad del cubo de pruebas en el centro del mundo
 var triangleEntity = world.CreateEntity();
-world.AddComponent(triangleEntity, new TagComponent("Mi Triángulo"));
+world.AddComponent(triangleEntity, new TagComponent("Mi cubo de pruebas"));
 world.AddComponent(triangleEntity, new TransformComponent { Position = Vector3.Zero }); // En (0,0,0)
 world.AddComponent(triangleEntity, new RenderableComponent());
 
