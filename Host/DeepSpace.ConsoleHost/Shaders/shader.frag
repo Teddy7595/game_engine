@@ -2,8 +2,8 @@
 out vec4 FragColor;
 
 struct Material {
-    vec3 diffuse;   
-    float shininess;  
+    vec3 diffuse;
+    float shininess;
 };
 
 in vec3 FragPos;
@@ -25,7 +25,7 @@ void main()
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
     
-    float specularStrength = 1.0; 
+    float specularStrength = 1.0;
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     

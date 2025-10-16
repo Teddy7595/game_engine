@@ -61,8 +61,7 @@ namespace DeepSpace.Application.Systems
                         projectionMatrix,
                         lightTransform.Position,
                         cameraTransform.Position,
-                        lightComponent.Color,
-                        lightComponent.Intensity
+                        lightComponent.Color
                     );
                 }
 

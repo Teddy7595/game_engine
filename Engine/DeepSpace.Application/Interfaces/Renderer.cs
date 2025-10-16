@@ -17,7 +17,7 @@ namespace DeepSpace.Application.Interfaces
             Matrix4x4 projection,
             Vector3 lightPosition,
             Vector3 viewPosition,
-            Color lightColor,
-            float lightIntensity);
+            Color lightColor
+            );
     }
 }

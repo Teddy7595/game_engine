@@ -16,7 +16,6 @@ namespace DeepSpace.Infrastructure.Rendering
         private int _lightPosLocation;   
         private int _lightColorLocation; 
         private int _viewPosLocation;
-        private int _objectColorLocation;
         private int _materialDiffuseLocation;
         private int _materialShininessLocation;
 
@@ -60,15 +59,21 @@ namespace DeepSpace.Infrastructure.Rendering
             _modelMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "model");
             _viewMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "view");
             _projectionMatrixLocation = _gl.GetUniformLocation(_shaderProgram, "projection");
-            // REFERENCIAS A MATERIAL
-            _materialDiffuseLocation = _gl.GetUniformLocation(_shaderProgram, "material.diffuse");
-            _materialShininessLocation = _gl.GetUniformLocation(_shaderProgram, "material.shininess");
             // UBICACIONES NUEVAS
             _lightPosLocation = _gl.GetUniformLocation(_shaderProgram, "lightPos");
             _lightColorLocation = _gl.GetUniformLocation(_shaderProgram, "lightColor");
             _viewPosLocation = _gl.GetUniformLocation(_shaderProgram, "viewPos");
-            //_objectColorLocation = _gl.GetUniformLocation(_shaderProgram, "objectColor");
+            // REFERENCIAS A MATERIAL
+            _materialDiffuseLocation = _gl.GetUniformLocation(_shaderProgram, "material.diffuse");
+            _materialShininessLocation = _gl.GetUniformLocation(_shaderProgram, "material.shininess");
             // --- FIN DE OBTENER UBICACIONES ---
+            Console.WriteLine($"#Material -> Diffuse={_materialDiffuseLocation}, Shininess={_materialShininessLocation}");
+            // --- LÍNEAS DE DEBUG ---
+            if (_materialDiffuseLocation == -1)
+                Console.WriteLine("ADVERTENCIA: No se encontró el uniform 'material.diffuse' en el shader.");
+            if (_materialShininessLocation == -1)
+                Console.WriteLine("ADVERTENCIA: No se encontró el uniform 'material.shininess' en el shader.");
+            
             
             // Limpiar shaders ya que están enlazados al programa
             _gl.DeleteShader(vertexShader);
@@ -83,11 +88,10 @@ namespace DeepSpace.Infrastructure.Rendering
             Matrix4x4 projectionMatrix,
             Vector3 lightPosition,
             Vector3 viewPosition,
-            Color lightColor,
-            float lightIntensity
+            Color lightColor
         )
         {
-            
+
             _gl.UseProgram(_shaderProgram);
             var concreteMesh = mesh as Mesh;
             if (concreteMesh == null) return;
@@ -104,22 +108,33 @@ namespace DeepSpace.Infrastructure.Rendering
                 _gl.UniformMatrix4(_modelMatrixLocation, 1, false, (float*)&model);
                 _gl.UniformMatrix4(_viewMatrixLocation, 1, false, (float*)&viewMatrix);
                 _gl.UniformMatrix4(_projectionMatrixLocation, 1, false, (float*)&projectionMatrix);
-                
+
                 _gl.Uniform3(_lightPosLocation, lightPosition);
                 _gl.Uniform3(_lightColorLocation, lightColor.R / 255.0f, lightColor.G / 255.0f, lightColor.B / 255.0f);
                 _gl.Uniform3(_viewPosLocation, viewPosition);
-                
+
                 /* // Por ahora, el color del objeto está "hardcodeado" a naranja
                 _gl.Uniform3(_objectColorLocation, 1.0f, 0.5f, 0.2f); */
 
                 var color = material.DiffuseColor;
                 _gl.Uniform3(_materialDiffuseLocation, color.R / 255.0f, color.G / 255.0f, color.B / 255.0f);
+                CheckGLErrors("Set material diffuse");
+
                 _gl.Uniform1(_materialShininessLocation, material.Shininess);
-                
+
                 _gl.DrawElements(PrimitiveType.Triangles, concreteMesh._indexCount, DrawElementsType.UnsignedInt, null);
             }
 
             concreteMesh.Unbind();
+        }
+        
+        private void CheckGLErrors(string stage)
+        {
+            GLEnum error;
+            while ((error = _gl.GetError()) != GLEnum.NoError)
+            {
+                Console.WriteLine($"ERROR DE OPENGL en la etapa '{stage}': {error}");
+            }
         }
 
         private void CheckCompileErrors(uint shader, string type)
