@@ -1,25 +1,26 @@
 using Silk.NET.OpenGL;
 using DeepSpace.Infrastructure.Rendering;
+using DeepSpace.Application.Interfaces;
 
 namespace DeepSpace.Infrastructure.Core
 {
-    public class ResourceManager
+    public class ResourceManager: IResourceManager
     {
-        private static GL? _gl;
-        private static Dictionary<string, Mesh> _meshes = new Dictionary<string, Mesh>();
+        private GL? _gl;
+        private Dictionary<string, Mesh> _meshes = new Dictionary<string, Mesh>();
 
-        public static void Initialize(GL gl)
+        public ResourceManager(GL gl)
         {
             _gl = gl;
         }
 
-        public static Mesh? GetMesh(string name)
+        public IMesh? GetMesh(string name)
         {
             _meshes.TryGetValue(name, out var mesh);
             return mesh;
         }
 
-        public static void CreateCubeMesh(string name)
+        public void CreateCubeMesh(string name)
         {
             // Movemos los datos del cubo desde el antiguo MeshRenderer aquí
             float[] vertices =

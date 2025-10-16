@@ -9,31 +9,17 @@ namespace DeepSpace.Application.Systems
     public class RenderSystem : ISystem
     {
         private readonly IRenderer _renderer;
+        private IResourceManager _resourceManager;
         private readonly float _aspectRatio;
         private readonly Camera _cameraLogic = new();
 
         // El sistema RECIBE la implementación del renderizador. No sabe cuál es.
-        public RenderSystem(IRenderer renderer, float aspectRatio)
+        public RenderSystem(IRenderer renderer, float aspectRatio, IResourceManager resourceManager)
         {
             _renderer = renderer;
             _aspectRatio = aspectRatio;
+            _resourceManager = resourceManager;
         }
-
-        /* public void Update(World world, float deltaTime)
-        {
-            // Obtener todas las entidades con el componente Renderable
-            var renderableEntities = world.View<RenderableComponent>();
-
-            foreach (var entity in renderableEntities)
-            {
-                var transform = world.GetComponent<TransformComponent>(entity);
-                if (transform != null)
-                {
-                    //El sistema solo habla con la interfaz del renderizador mas no con la clase en concreto
-                    _renderer.DrawTriangles(transform);
-                }
-            }
-        } */
 
         public void Update(World world, float deltaTime)
         {
@@ -61,10 +47,13 @@ namespace DeepSpace.Application.Systems
             foreach (var entity in renderableEntities)
             {
                 var transform = world.GetRequiredComponent<TransformComponent>(entity);
-                if (transform != null)
+                var renderable = world.GetRequiredComponent<RenderableComponent>(entity);
+                var mesh = _resourceManager.GetMesh(renderable.MeshName);
+                
+                if (mesh != null)
                 {
-                    //El sistema solo habla con la interfaz del renderizador mas no con la clase en concreto
                     _renderer.DrawMesh(
+                        mesh,
                         transform,
                         viewMatrix,
                         projectionMatrix,
@@ -74,6 +63,7 @@ namespace DeepSpace.Application.Systems
                         lightComponent.Intensity
                     );
                 }
+
             }
         }
     }

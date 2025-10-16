@@ -5,6 +5,7 @@ using DeepSpace.Domain.Core;
 using DeepSpace.Application.Systems;
 using DeepSpace.Infrastructure.Rendering;
 using DeepSpace.Infrastructure.Input;
+using DeepSpace.Infrastructure.Core;
 
 namespace DeepSpace.Infrastructure.Windowing
 {
@@ -38,6 +39,10 @@ namespace DeepSpace.Infrastructure.Windowing
             _gl = _window.CreateOpenGL();
             if (_gl == null) throw new InvalidOperationException("Failed to create OpenGL context.");
 
+            // Inicializar el gestor de recursos
+            var resourceManager = new ResourceManager(_gl);
+            resourceManager.CreateCubeMesh("Cube");
+
             // Inicializar el gestor de entrada
             var inputContext = _window.CreateInput();
             var keyboard = inputContext.Keyboards.FirstOrDefault() ?? throw new InvalidOperationException("No keyboard found.");
@@ -60,8 +65,8 @@ namespace DeepSpace.Infrastructure.Windowing
 
             // Calcular la relación de aspecto
             var aspectRatio = (float)_window.Size.X / _window.Size.Y;
-            // Añadir el sistema de renderizado al SystemManager
-            _systemManager.AddSystem(new RenderSystem(_renderer, aspectRatio));
+            // Pasar el gestor de recursos al sistema de renderizado
+            _systemManager.AddSystem(new RenderSystem(_renderer, aspectRatio, resourceManager));
             // Añadir el sistema de input al SystemManager
             _systemManager.AddSystem(new InputSystem(inputManager));
         }

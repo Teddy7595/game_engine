@@ -1,8 +1,9 @@
+using DeepSpace.Application.Interfaces;
 using Silk.NET.OpenGL;
 
 namespace DeepSpace.Infrastructure.Rendering
 {
-    public class Mesh
+    public class Mesh : IMesh
     {
         // Mesh data and methods go here
         public uint _vao { get; private set; }
@@ -74,6 +75,7 @@ namespace DeepSpace.Infrastructure.Rendering
         public void Unbind()
         {
             _gl.BindVertexArray(0);
+
         }
 
     }

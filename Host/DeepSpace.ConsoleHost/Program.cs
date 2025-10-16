@@ -15,7 +15,7 @@ systemManager.AddSystem(new RotationSystem());
 var triangleEntity = world.CreateEntity();
 world.AddComponent(triangleEntity, new TagComponent("Mi cubo de pruebas"));
 world.AddComponent(triangleEntity, new TransformComponent { Position = Vector3.Zero }); // En (0,0,0)
-world.AddComponent(triangleEntity, new RenderableComponent());
+world.AddComponent(triangleEntity, new RenderableComponent("Cube")); // Usando la malla "Cubo"
 world.AddComponent(triangleEntity, new AutoRotateComponent()); // Le añadimos auto-rotación
 
 // Creamos la entidad de la CÁMARA
