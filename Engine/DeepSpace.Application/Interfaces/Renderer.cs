@@ -11,6 +11,7 @@ namespace DeepSpace.Application.Interfaces
         void Clear(Color color);
         void DrawMesh(
             IMesh mesh,
+            MaterialComponent material,
             TransformComponent transform,
             Matrix4x4 view,
             Matrix4x4 projection,

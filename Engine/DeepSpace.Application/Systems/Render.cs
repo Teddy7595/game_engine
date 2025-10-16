@@ -49,11 +49,13 @@ namespace DeepSpace.Application.Systems
                 var transform = world.GetRequiredComponent<TransformComponent>(entity);
                 var renderable = world.GetRequiredComponent<RenderableComponent>(entity);
                 var mesh = _resourceManager.GetMesh(renderable.MeshName);
-                
+                var material = world.GetComponent<MaterialComponent>(entity) ?? new MaterialComponent(); // Material por defecto si no tiene
+                Console.WriteLine($"Renderizando entidad {material.DiffuseColor} {material.Shininess}  malla '{renderable.MeshName}'");
                 if (mesh != null)
                 {
                     _renderer.DrawMesh(
                         mesh,
+                        material,
                         transform,
                         viewMatrix,
                         projectionMatrix,

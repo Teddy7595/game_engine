@@ -17,6 +17,12 @@ world.AddComponent(planetEntity, new TagComponent("Planeta"));
 world.AddComponent(planetEntity, new TransformComponent { Position = Vector3.Zero }); // En el centro
 world.AddComponent(planetEntity, new AutoRotateComponent());
 world.AddComponent(planetEntity, new RenderableComponent("Cube"));
+// Le damos un material azul con un brillo suave
+world.AddComponent(planetEntity, new MaterialComponent 
+{ 
+    DiffuseColor = Color.CornflowerBlue, 
+    Shininess = 16.0f 
+});
 
 // --- ¡NUEVO! Creamos la entidad de la "Luna" ---
 var moonEntity = world.CreateEntity();
@@ -29,6 +35,12 @@ world.AddComponent(moonEntity, new TransformComponent
 });
 world.AddComponent(moonEntity, new AutoRotateComponent()); // También la hacemos girar
 world.AddComponent(moonEntity, new RenderableComponent("Cube")); // ¡Reutiliza la misma malla!
+// Le damos un material rojo muy pulido (brillo intenso)
+world.AddComponent(moonEntity, new MaterialComponent 
+{ 
+    DiffuseColor = Color.IndianRed, 
+    Shininess = 128.0f 
+});
 
 // Creamos la entidad de la CÁMARA
 var cameraEntity = world.CreateEntity();
