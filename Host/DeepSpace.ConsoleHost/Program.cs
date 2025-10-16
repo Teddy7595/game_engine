@@ -11,12 +11,24 @@ var systemManager = new SystemManager();
 systemManager.AddSystem(new DebugLogSystem());
 systemManager.AddSystem(new RotationSystem());
 
-// Creamos la entidad del cubo de pruebas en el centro del mundo
-var triangleEntity = world.CreateEntity();
-world.AddComponent(triangleEntity, new TagComponent("Mi cubo de pruebas"));
-world.AddComponent(triangleEntity, new TransformComponent { Position = Vector3.Zero }); // En (0,0,0)
-world.AddComponent(triangleEntity, new RenderableComponent("Cube")); // Usando la malla "Cubo"
-world.AddComponent(triangleEntity, new AutoRotateComponent()); // Le añadimos auto-rotación
+// --- Creamos la entidad del "Planeta" ---
+var planetEntity = world.CreateEntity();
+world.AddComponent(planetEntity, new TagComponent("Planeta"));
+world.AddComponent(planetEntity, new TransformComponent { Position = Vector3.Zero }); // En el centro
+world.AddComponent(planetEntity, new AutoRotateComponent());
+world.AddComponent(planetEntity, new RenderableComponent("Cube"));
+
+// --- ¡NUEVO! Creamos la entidad de la "Luna" ---
+var moonEntity = world.CreateEntity();
+world.AddComponent(moonEntity, new TagComponent("Luna"));
+// La posicionamos a la derecha y la hacemos más pequeña
+world.AddComponent(moonEntity, new TransformComponent 
+{ 
+    Position = new Vector3(2, 0, 0), 
+    Scale = new Vector3(0.3f) 
+});
+world.AddComponent(moonEntity, new AutoRotateComponent()); // También la hacemos girar
+world.AddComponent(moonEntity, new RenderableComponent("Cube")); // ¡Reutiliza la misma malla!
 
 // Creamos la entidad de la CÁMARA
 var cameraEntity = world.CreateEntity();
