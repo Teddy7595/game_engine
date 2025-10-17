@@ -45,8 +45,8 @@ namespace DeepSpace.Infrastructure.Rendering
             }
 
             //-- configurar los punteros de atributos de vértices
-            // El stride (paso) ahora es de 6 floats (3 de posición + 3 de normal)
-            int stride = 6 * sizeof(float);
+            // El stride (paso) ahora es de 8 floats (3 de posición + 3 de normal + 2 de UV)
+            int stride = 8 * sizeof(float);
 
             // Atributo de Posición (location = 0)
             unsafe
@@ -63,7 +63,15 @@ namespace DeepSpace.Infrastructure.Rendering
             }
             _gl.EnableVertexAttribArray(1);
 
-            // Desvinculamos el VAO para evitar modificaciones accidentales
+            unsafe
+            {
+                // Atributo de Coordenadas de Textura (UV) (location = 2)
+                // El offset es de 6 floats, que es donde empiezan los datos de UV
+                _gl.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (uint)stride, (void*)(6 * sizeof(float)));
+            }
+            _gl.EnableVertexAttribArray(2);
+
+            // Desbindear el VAO para evitar modificaciones accidentales
             _gl.BindVertexArray(0);
         }
 
@@ -74,7 +82,7 @@ namespace DeepSpace.Infrastructure.Rendering
 
         public void Unbind()
         {
-            _gl.BindVertexArray(0);
+            _gl.BindVertexArray(_vao);
 
         }
 
