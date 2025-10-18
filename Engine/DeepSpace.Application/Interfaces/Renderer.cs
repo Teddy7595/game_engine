@@ -13,6 +13,7 @@ namespace DeepSpace.Application.Interfaces
             IMesh mesh,
             MaterialComponent material,
             TransformComponent transform,
+            ITexture texture,
             Matrix4x4 view,
             Matrix4x4 projection,
             Vector3 lightPosition,

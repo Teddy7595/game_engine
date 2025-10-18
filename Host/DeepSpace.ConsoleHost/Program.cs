@@ -18,35 +18,37 @@ world.AddComponent(planetEntity, new TransformComponent { Position = Vector3.Zer
 world.AddComponent(planetEntity, new AutoRotateComponent());
 world.AddComponent(planetEntity, new RenderableComponent("Cube"));
 // Le damos un material azul con un brillo suave
-world.AddComponent(planetEntity, new MaterialComponent 
-{ 
-    DiffuseColor = Color.CornflowerBlue, 
-    Shininess = 16.0f 
+world.AddComponent(planetEntity, new MaterialComponent
+{
+    TextureName = "container",
+    DiffuseColor = Color.White,
+    Shininess = 16.0f
 });
 
 // --- ¡NUEVO! Creamos la entidad de la "Luna" ---
 var moonEntity = world.CreateEntity();
 world.AddComponent(moonEntity, new TagComponent("Luna"));
 // La posicionamos a la derecha y la hacemos más pequeña
-world.AddComponent(moonEntity, new TransformComponent 
-{ 
-    Position = new Vector3(2, 0, 0), 
-    Scale = new Vector3(0.3f) 
+world.AddComponent(moonEntity, new TransformComponent
+{
+    Position = new Vector3(2, 0, 0),
+    Scale = new Vector3(0.3f)
 });
 world.AddComponent(moonEntity, new AutoRotateComponent()); // También la hacemos girar
 world.AddComponent(moonEntity, new RenderableComponent("Cube")); // ¡Reutiliza la misma malla!
 // Le damos un material rojo muy pulido (brillo intenso)
-world.AddComponent(moonEntity, new MaterialComponent 
-{ 
-    DiffuseColor = Color.IndianRed, 
-    Shininess = 128.0f 
+world.AddComponent(moonEntity, new MaterialComponent
+{
+    TextureName = null,
+    DiffuseColor = Color.IndianRed,
+    Shininess = 128.0f
 });
 
 // Creamos la entidad de la CÁMARA
 var cameraEntity = world.CreateEntity();
 world.AddComponent(cameraEntity, new TagComponent("Cámara Principal"));
 // La posicionamos un poco hacia atrás en el eje Z para que pueda "ver" el origen
-world.AddComponent(cameraEntity, new TransformComponent { Position = new Vector3(0, 0, 3) });
+world.AddComponent(cameraEntity, new TransformComponent { Position = new Vector3(-1, 0, 3) });
 world.AddComponent(cameraEntity, new CameraComponent());
 world.AddComponent(cameraEntity, new MainCameraComponent()); // La marcamos como principal
 
@@ -54,7 +56,7 @@ world.AddComponent(cameraEntity, new MainCameraComponent()); // La marcamos como
 var lightEntity = world.CreateEntity();
 world.AddComponent(lightEntity, new TagComponent("Luz Principal"));
 world.AddComponent(lightEntity, new TransformComponent { Position = new Vector3(0, 5, 0) });
-world.AddComponent(lightEntity, new LightComponent { Color = Color.Red, Intensity = 0.85f });
+world.AddComponent(lightEntity, new LightComponent { Color = Color.White, Intensity = 0.85f });
 
 // --- EJECUCIÓN ---
 var gameWindow = new GameWindow(systemManager, world);
@@ -64,4 +66,3 @@ gameWindow.Run();
 
 
 
-    

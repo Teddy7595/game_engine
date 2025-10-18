@@ -13,11 +13,12 @@ namespace DeepSpace.Infrastructure.Rendering
         private int _modelMatrixLocation;
         private int _viewMatrixLocation;
         private int _projectionMatrixLocation;
-        private int _lightPosLocation;   
-        private int _lightColorLocation; 
+        private int _lightPosLocation;
+        private int _lightColorLocation;
         private int _viewPosLocation;
         private int _materialDiffuseLocation;
         private int _materialShininessLocation;
+        private int _textureSamplerLocation;
 
         public MeshRenderer(GL gl)
         {
@@ -66,15 +67,11 @@ namespace DeepSpace.Infrastructure.Rendering
             // REFERENCIAS A MATERIAL
             _materialDiffuseLocation = _gl.GetUniformLocation(_shaderProgram, "material.diffuse");
             _materialShininessLocation = _gl.GetUniformLocation(_shaderProgram, "material.shininess");
-            // --- FIN DE OBTENER UBICACIONES ---
-            Console.WriteLine($"#Material -> Diffuse={_materialDiffuseLocation}, Shininess={_materialShininessLocation}");
-            // --- LÍNEAS DE DEBUG ---
-            if (_materialDiffuseLocation == -1)
-                Console.WriteLine("ADVERTENCIA: No se encontró el uniform 'material.diffuse' en el shader.");
-            if (_materialShininessLocation == -1)
-                Console.WriteLine("ADVERTENCIA: No se encontró el uniform 'material.shininess' en el shader.");
-            
-            
+
+            //Textura location
+            _textureSamplerLocation = _gl.GetUniformLocation(_shaderProgram, "textureSampler");
+
+
             // Limpiar shaders ya que están enlazados al programa
             _gl.DeleteShader(vertexShader);
             _gl.DeleteShader(fragmentShader);
@@ -84,6 +81,7 @@ namespace DeepSpace.Infrastructure.Rendering
             IMesh mesh,
             MaterialComponent material,
             TransformComponent transform,
+            ITexture texture,
             Matrix4x4 viewMatrix,
             Matrix4x4 projectionMatrix,
             Vector3 lightPosition,
@@ -91,11 +89,15 @@ namespace DeepSpace.Infrastructure.Rendering
             Color lightColor
         )
         {
-
-            _gl.UseProgram(_shaderProgram);
+            CheckGLErrors("Before DrawMesh");
             var concreteMesh = mesh as Mesh;
-            if (concreteMesh == null) return;
+            var concreteTexture = texture as DSTexture;
+            if (concreteMesh == null && concreteMesh == null) return;
+
+            // 1. Usar el programa de shaders y bindear la malla y textura
+            _gl.UseProgram(_shaderProgram);
             concreteMesh.Bind();
+            concreteTexture.Bind(TextureUnit.Texture0);
 
             // 2. Calcular y enviar los uniforms (lógica de matrices y luz)
             Matrix4x4 model = Matrix4x4.CreateScale(transform.Scale) *
@@ -113,21 +115,24 @@ namespace DeepSpace.Infrastructure.Rendering
                 _gl.Uniform3(_lightColorLocation, lightColor.R / 255.0f, lightColor.G / 255.0f, lightColor.B / 255.0f);
                 _gl.Uniform3(_viewPosLocation, viewPosition);
 
-                /* // Por ahora, el color del objeto está "hardcodeado" a naranja
-                _gl.Uniform3(_objectColorLocation, 1.0f, 0.5f, 0.2f); */
-
                 var color = material.DiffuseColor;
                 _gl.Uniform3(_materialDiffuseLocation, color.R / 255.0f, color.G / 255.0f, color.B / 255.0f);
                 CheckGLErrors("Set material diffuse");
-
                 _gl.Uniform1(_materialShininessLocation, material.Shininess);
+                CheckGLErrors("Set material shininess");
+                // Setear el sampler de textura
+                _gl.Uniform1(_textureSamplerLocation, 0); // Texture unit 0
+                CheckGLErrors("Set texture sampler");
 
                 _gl.DrawElements(PrimitiveType.Triangles, concreteMesh._indexCount, DrawElementsType.UnsignedInt, null);
             }
+            CheckGLErrors("Después de DrawElements");
 
             concreteMesh.Unbind();
+            concreteTexture.Unbind();
+            CheckGLErrors("Al final de DrawMesh");
         }
-        
+
         private void CheckGLErrors(string stage)
         {
             GLEnum error;

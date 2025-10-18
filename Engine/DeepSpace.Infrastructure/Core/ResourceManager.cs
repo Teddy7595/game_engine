@@ -6,8 +6,9 @@ namespace DeepSpace.Infrastructure.Core
 {
     public class ResourceManager : IResourceManager
     {
-        private GL? _gl;
-        private Dictionary<string, Mesh> _meshes = new Dictionary<string, Mesh>();
+        private readonly GL? _gl;
+        private readonly Dictionary<string, Mesh> _meshes = new Dictionary<string, Mesh>();
+        private readonly Dictionary<string, DSTexture> _textures = new Dictionary<string, DSTexture>();
 
         public ResourceManager(GL gl)
         {
@@ -18,6 +19,18 @@ namespace DeepSpace.Infrastructure.Core
         {
             _meshes.TryGetValue(name, out var mesh);
             return mesh;
+        }
+
+        public ITexture? GetTexture(string name)
+        {
+            _textures.TryGetValue(name, out var texture);
+            return texture;
+        }
+
+        public void LoadTexture(string name, string path)
+        {
+            var texture = new DSTexture(_gl, path);
+            _textures.Add(name, texture);
         }
 
         public void CreateCubeMesh(string name)

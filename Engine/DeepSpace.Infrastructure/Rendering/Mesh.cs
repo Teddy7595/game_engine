@@ -29,7 +29,12 @@ namespace DeepSpace.Infrastructure.Rendering
             {
                 fixed (float* v = vertices)
                 {
-                    _gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(sizeof(float) * vertices.Length), v, BufferUsageARB.StaticDraw);
+                    _gl.BufferData(
+                        BufferTargetARB.ArrayBuffer,
+                        (nuint)(sizeof(float) * vertices.Length),
+                        v,
+                        BufferUsageARB.StaticDraw
+                    );
                 }
             }
 
@@ -40,7 +45,12 @@ namespace DeepSpace.Infrastructure.Rendering
             {
                 fixed (uint* ptr = indices)
                 {
-                    _gl.BufferData(BufferTargetARB.ElementArrayBuffer, (uint)(indices.Length * sizeof(uint)), ptr, BufferUsageARB.StaticDraw);
+                    _gl.BufferData(
+                        BufferTargetARB.ElementArrayBuffer,
+                        (uint)(indices.Length * sizeof(uint)),
+                        ptr,
+                        BufferUsageARB.StaticDraw
+                    );
                 }
             }
 
@@ -49,26 +59,18 @@ namespace DeepSpace.Infrastructure.Rendering
             int stride = 8 * sizeof(float);
 
             // Atributo de Posición (location = 0)
-            unsafe
-            {
-                _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint)stride, null);
-            }
+            _gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, (uint)stride, 0);
             _gl.EnableVertexAttribArray(0);
 
             // Atributo de Normal (location = 1)
             // El offset es de 3 floats, que es donde empiezan los datos de la normal
-            unsafe
-            {
-                _gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (uint)stride, (void*)(3 * sizeof(float)));
-            }
+
+            _gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, (uint)stride, 3 * sizeof(float));
             _gl.EnableVertexAttribArray(1);
 
-            unsafe
-            {
-                // Atributo de Coordenadas de Textura (UV) (location = 2)
-                // El offset es de 6 floats, que es donde empiezan los datos de UV
-                _gl.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (uint)stride, (void*)(6 * sizeof(float)));
-            }
+            // Atributo de Coordenadas de Textura (UV) (location = 2)
+            // El offset es de 6 floats, que es donde empiezan los datos de UV
+            _gl.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, (uint)stride, 6 * sizeof(float));
             _gl.EnableVertexAttribArray(2);
 
             // Desbindear el VAO para evitar modificaciones accidentales
@@ -82,7 +84,7 @@ namespace DeepSpace.Infrastructure.Rendering
 
         public void Unbind()
         {
-            _gl.BindVertexArray(_vao);
+            _gl.BindVertexArray(0);
 
         }
 

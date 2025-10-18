@@ -48,22 +48,27 @@ namespace DeepSpace.Application.Systems
             {
                 var transform = world.GetRequiredComponent<TransformComponent>(entity);
                 var renderable = world.GetRequiredComponent<RenderableComponent>(entity);
-                var mesh = _resourceManager.GetMesh(renderable.MeshName);
+
+                IMesh? mesh = _resourceManager.GetMesh(renderable.MeshName);
+
                 var material = world.GetComponent<MaterialComponent>(entity) ?? new MaterialComponent(); // Material por defecto si no tiene
-                Console.WriteLine($"Renderizando entidad {material.DiffuseColor} {material.Shininess}  malla '{renderable.MeshName}'");
-                if (mesh != null)
-                {
-                    _renderer.DrawMesh(
-                        mesh,
-                        material,
-                        transform,
-                        viewMatrix,
-                        projectionMatrix,
-                        lightTransform.Position,
-                        cameraTransform.Position,
-                        lightComponent.Color
-                    );
-                }
+                string textureName = material.TextureName ?? "default_white"; // Usar textura por defecto si no tiene asignada
+                ITexture? textureToUse = _resourceManager.GetTexture(textureName);
+
+                if (mesh == null || textureToUse == null)
+                    continue; // Saltar si no hay malla O textura
+
+                _renderer.DrawMesh(
+                    mesh,
+                    material,
+                    transform,
+                    textureToUse,
+                    viewMatrix,
+                    projectionMatrix,
+                    lightTransform.Position,
+                    cameraTransform.Position,
+                    lightComponent.Color
+                );
 
             }
         }

@@ -43,6 +43,12 @@ namespace DeepSpace.Infrastructure.Windowing
             var resourceManager = new ResourceManager(_gl);
             resourceManager.CreateCubeMesh("Cube");
 
+            // Cargar texturas u otros recursos aquí si es necesario
+            string texturePath = Path.Combine(AppContext.BaseDirectory, "Assets");
+            Console.WriteLine($"Cargando texturas desde: {texturePath}");
+            resourceManager.LoadTexture("default_white", Path.Combine(texturePath, "white.png"));
+            resourceManager.LoadTexture("container", Path.Combine(texturePath, "container.png"));
+
             // Inicializar el gestor de entrada
             var inputContext = _window.CreateInput();
             var keyboard = inputContext.Keyboards.FirstOrDefault() ?? throw new InvalidOperationException("No keyboard found.");
@@ -58,7 +64,7 @@ namespace DeepSpace.Infrastructure.Windowing
                 mouse.Cursor.CursorMode = CursorMode.Raw;
                 inputManager.CaptureLastMousePosition();
             }
-            
+
             // Inicializar el renderizador de triángulos
             var _renderer = new MeshRenderer(_gl);
             _renderer.Load();
@@ -73,7 +79,7 @@ namespace DeepSpace.Infrastructure.Windowing
 
         private void OnUpdate(double deltaTime)
         {
-            
+
         }
 
         public void Run() => _window.Run();
